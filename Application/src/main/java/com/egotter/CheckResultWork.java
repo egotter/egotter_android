@@ -61,10 +61,6 @@ public class CheckResultWork extends Worker {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
 
-        char[] buffer = new char[1024];
-
-        String jsonString = new String();
-
         StringBuilder sb = new StringBuilder();
         String line;
         while ((line = br.readLine()) != null) {
@@ -72,7 +68,7 @@ public class CheckResultWork extends Worker {
         }
         br.close();
 
-        jsonString = sb.toString();
+        String jsonString = sb.toString();
 
         System.out.println("JSON: " + jsonString);
         urlConnection.disconnect();

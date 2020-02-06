@@ -59,11 +59,19 @@
         android:layout_below="@+id/save"
         android:id="@+id/signInWithTwitter"/>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="サーバーに送信する"
+        android:onClick="sendInstanceIdToServer"
+        android:layout_below="@+id/signInWithTwitter"
+        android:id="@+id/sendToServer"/>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Pick your Notification Style:"
-        android:layout_below="@+id/signInWithTwitter"
+        android:layout_below="@+id/sendToServer"
         android:id="@+id/spinnerHeadertextView"/>
 
     <Spinner

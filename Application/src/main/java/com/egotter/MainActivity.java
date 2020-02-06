@@ -15,13 +15,17 @@ limitations under the License.
  */
 package com.egotter;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -29,7 +33,9 @@ import android.widget.ArrayAdapter;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -61,10 +67,14 @@ import com.egotter.handlers.BigTextMainActivity;
 import com.egotter.handlers.InboxMainActivity;
 import com.egotter.handlers.MessagingIntentService;
 import com.egotter.handlers.MessagingMainActivity;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.OAuthCredential;
 import com.google.firebase.auth.OAuthProvider;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.concurrent.TimeUnit;
 
@@ -133,11 +143,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mSpinner.setAdapter(adapter);
         mSpinner.setOnItemSelectedListener(this);
 
-        workRequest = new PeriodicWorkRequest.Builder(CheckResultWork.class, 1, TimeUnit.MINUTES).addTag(CheckResultWork.TAG).build();
-        WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(CheckResultWork.TAG, ExistingPeriodicWorkPolicy.REPLACE, workRequest);
+        // workRequest = new PeriodicWorkRequest.Builder(CheckResultWork.class, 1, TimeUnit.MINUTES).addTag(CheckResultWork.TAG).build();
+        // WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(CheckResultWork.TAG, ExistingPeriodicWorkPolicy.REPLACE, workRequest);
 
         FirebaseAuth.getInstance().signOut();
         firebaseAuth = FirebaseAuth.getInstance();
+
+        getInstanceId();
     }
 
     @Override
@@ -208,6 +220,59 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
     }
 
+    public void getInstanceId() {
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+                        saveInstanceId(token);
+
+                        // Log and toast
+                        String msg = getString(R.string.msg_token_fmt, token);
+                        Log.d(TAG, msg);
+                    }
+                });
+    }
+
+    private void saveInstanceId(String token) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("fcm_instance_id", token);
+        editor.apply();
+
+        Toast.makeText(this, token, Toast.LENGTH_SHORT).show();
+        sendInstanceIdToServer(null);
+    }
+
+    private void saveCredentials(String uid, String token, String secret) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("twitter_id", uid);
+        editor.putString("twitter_access_token", token);
+        editor.putString("twitter_access_secret", secret);
+        editor.apply();
+
+        Toast.makeText(this, uid, Toast.LENGTH_SHORT).show();
+        sendInstanceIdToServer(null);
+    }
+
+    public void sendInstanceIdToServer(View view) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        if (prefs.contains("fcm_instance_id") && prefs.contains("twitter_id") && prefs.contains("twitter_access_token") && prefs.contains("twitter_access_secret")) {
+            HttpUtil.sendInstanceIdToServer(prefs.getString("twitter_id", ""),
+                    prefs.getString("fcm_instance_id", ""),
+                    prefs.getString("twitter_access_token", ""),
+                    prefs.getString("twitter_access_secret", ""));
+        }
+    }
+
     public FirebaseUser getCurrentUser() {
         if (Build.FINGERPRINT.contains("sdk_google_phone_x86")) {
             return null;
@@ -231,13 +296,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                             new OnSuccessListener<AuthResult>() {
                                 @Override
                                 public void onSuccess(AuthResult authResult) {
-                                    // User is signed in.
-                                    // IdP data available in
-                                    // authResult.getAdditionalUserInfo().getProfile().
-                                    // The OAuth access token can also be retrieved:
-                                    // authResult.getCredential().getAccessToken().
-                                    // The OAuth secret can be retrieved by calling:
-                                    // authResult.getCredential().getSecret().
                                     Log.d(TAG, "signInWithTwitter() pending result is found");
                                 }
                             })
@@ -259,14 +317,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                             new OnSuccessListener<AuthResult>() {
                                 @Override
                                 public void onSuccess(AuthResult authResult) {
-                                    // User is signed in.
-                                    // IdP data available in
-                                    // authResult.getAdditionalUserInfo().getProfile().
-                                    // The OAuth access token can also be retrieved:
-                                    // authResult.getCredential().getAccessToken().
-                                    // The OAuth secret can be retrieved by calling:
-                                    // authResult.getCredential().getSecret().
                                     Log.d(TAG, authResult.getAdditionalUserInfo().getProfile().toString());
+
+                                    String uid = String.valueOf(authResult.getAdditionalUserInfo().getProfile().get("id"));
+                                    OAuthCredential credential = (OAuthCredential) authResult.getCredential();
+                                    saveCredentials(uid, credential.getAccessToken(), credential.getSecret());
                                 }
                             })
                     .addOnFailureListener(
