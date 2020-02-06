@@ -458,7 +458,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 .setContentTitle(bigTextStyleReminderAppData.getContentTitle())
                 // Content for API <24 (7.0 and below) devices.
                 .setContentText(bigTextStyleReminderAppData.getContentText())
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setSmallIcon(R.drawable.ic_stat_name)
                 .setLargeIcon(BitmapFactory.decodeResource(
                         getResources(),
                         R.drawable.ic_alarm_white_48dp))
