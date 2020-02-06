@@ -19,6 +19,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -187,6 +188,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             default:
                 // continue below
         }
+    }
+
+    public void onClickOpen(View view) {
+
+        Log.d(TAG, "onClickOpen()");
+
+        openEgotterSettings();
     }
 
     /*
@@ -871,6 +879,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
         intent.putExtra("app_package", getPackageName());
         intent.putExtra("app_uid", getApplicationInfo().uid);
+        startActivity(intent);
+    }
+
+    private void openEgotterSettings() {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse("https://egotter.com/settings?via=android"));
         startActivity(intent);
     }
 }
