@@ -30,8 +30,12 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationCompat.Action;
@@ -57,6 +61,10 @@ import com.egotter.handlers.BigTextMainActivity;
 import com.egotter.handlers.InboxMainActivity;
 import com.egotter.handlers.MessagingIntentService;
 import com.egotter.handlers.MessagingMainActivity;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.OAuthProvider;
 
 import java.util.concurrent.TimeUnit;
 
@@ -99,6 +107,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private PeriodicWorkRequest workRequest;
 
+    private FirebaseAuth firebaseAuth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -125,6 +135,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         workRequest = new PeriodicWorkRequest.Builder(CheckResultWork.class, 1, TimeUnit.MINUTES).addTag(CheckResultWork.TAG).build();
         WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(CheckResultWork.TAG, ExistingPeriodicWorkPolicy.REPLACE, workRequest);
+
+        FirebaseAuth.getInstance().signOut();
+        firebaseAuth = FirebaseAuth.getInstance();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
     }
 
     @Override
@@ -190,11 +208,76 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
     }
 
-    public void onClickOpen(View view) {
+    public FirebaseUser getCurrentUser() {
+        if (Build.FINGERPRINT.contains("sdk_google_phone_x86")) {
+            return null;
+        } else {
+            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+            return currentUser;
+        }
+    }
 
-        Log.d(TAG, "onClickOpen()");
+    public void signInWithTwitter(View view) {
 
-        openEgotterSettings();
+        Log.d(TAG, "signInWithTwitter()");
+
+//        openEgotterSettings();
+
+        Task<AuthResult> pendingResultTask = firebaseAuth.getPendingAuthResult();
+        if (pendingResultTask != null) {
+            // There's something already here! Finish the sign-in for your user.
+            pendingResultTask
+                    .addOnSuccessListener(
+                            new OnSuccessListener<AuthResult>() {
+                                @Override
+                                public void onSuccess(AuthResult authResult) {
+                                    // User is signed in.
+                                    // IdP data available in
+                                    // authResult.getAdditionalUserInfo().getProfile().
+                                    // The OAuth access token can also be retrieved:
+                                    // authResult.getCredential().getAccessToken().
+                                    // The OAuth secret can be retrieved by calling:
+                                    // authResult.getCredential().getSecret().
+                                    Log.d(TAG, "signInWithTwitter() pending result is found");
+                                }
+                            })
+                    .addOnFailureListener(
+                            new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    // Handle failure.
+                                    Log.e(TAG, "signInWithTwitter() pending result is failed");
+                                }
+                            });
+        } else {
+            OAuthProvider.Builder provider = OAuthProvider.newBuilder("twitter.com");
+            provider.addCustomParameter("lang", "ja");
+
+            firebaseAuth
+                    .startActivityForSignInWithProvider(this, provider.build())
+                    .addOnSuccessListener(
+                            new OnSuccessListener<AuthResult>() {
+                                @Override
+                                public void onSuccess(AuthResult authResult) {
+                                    // User is signed in.
+                                    // IdP data available in
+                                    // authResult.getAdditionalUserInfo().getProfile().
+                                    // The OAuth access token can also be retrieved:
+                                    // authResult.getCredential().getAccessToken().
+                                    // The OAuth secret can be retrieved by calling:
+                                    // authResult.getCredential().getSecret().
+                                    Log.d(TAG, authResult.getAdditionalUserInfo().getProfile().toString());
+                                }
+                            })
+                    .addOnFailureListener(
+                            new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    // Handle failure.
+                                    Log.e(TAG, "signInWithTwitter() signIn is failed");
+                                }
+                            });
+        }
     }
 
     /*
