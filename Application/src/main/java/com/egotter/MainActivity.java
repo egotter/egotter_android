@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-package com.example.android.wearable.wear.wearnotifications;
+package com.egotter;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -50,13 +50,13 @@ import androidx.work.WorkManager;
 
 import com.example.android.wearable.wear.common.mock.MockDatabase;
 import com.example.android.wearable.wear.common.util.NotificationUtil;
-import com.example.android.wearable.wear.wearnotifications.handlers.BigPictureSocialIntentService;
-import com.example.android.wearable.wear.wearnotifications.handlers.BigPictureSocialMainActivity;
-import com.example.android.wearable.wear.wearnotifications.handlers.BigTextIntentService;
-import com.example.android.wearable.wear.wearnotifications.handlers.BigTextMainActivity;
-import com.example.android.wearable.wear.wearnotifications.handlers.InboxMainActivity;
-import com.example.android.wearable.wear.wearnotifications.handlers.MessagingIntentService;
-import com.example.android.wearable.wear.wearnotifications.handlers.MessagingMainActivity;
+import com.egotter.handlers.BigPictureSocialIntentService;
+import com.egotter.handlers.BigPictureSocialMainActivity;
+import com.egotter.handlers.BigTextIntentService;
+import com.egotter.handlers.BigTextMainActivity;
+import com.egotter.handlers.InboxMainActivity;
+import com.egotter.handlers.MessagingIntentService;
+import com.egotter.handlers.MessagingMainActivity;
 
 import java.util.concurrent.TimeUnit;
 

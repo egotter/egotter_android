@@ -13,15 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-package com.example.android.wearable.wear.wearnotifications.handlers;
+package com.egotter.handlers;
 
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.example.android.wearable.wear.wearnotifications.MainActivity;
-import com.example.android.wearable.wear.wearnotifications.R;
+import com.egotter.MainActivity;
+import com.egotter.R;
 
 /**
  * Template class meant to include functionality for your Reminder/Alarm App. (This project's main

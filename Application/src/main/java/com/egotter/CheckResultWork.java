@@ -1,4 +1,4 @@
-package com.example.android.wearable.wear.wearnotifications;
+package com.egotter;
 
 import android.content.Context;
 import android.util.Log;
