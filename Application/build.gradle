@@ -27,7 +27,6 @@ dependencies {
 
 
     implementation project(':Shared')
-    wearApp project(':Wearable')
 }
 
 // The sample build uses multiple directories to
