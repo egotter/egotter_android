@@ -74,6 +74,9 @@ import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.Date;
 
+import hotchemi.android.rate.AppRate;
+import hotchemi.android.rate.OnClickButtonListener;
+
 /**
  * The Activity demonstrates several popular Notification.Style examples along with their best
  * practices (include proper Wear support when you don't have a dedicated Wear app).
@@ -176,6 +179,20 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(CheckResultWork.TAG, ExistingPeriodicWorkPolicy.REPLACE, workRequest);
 
         getInstanceId();
+
+        AppRate.with(this)
+                .setInstallDays(3)
+                .setLaunchTimes(10)
+                .setRemindInterval(2)
+                .setShowLaterButton(true)
+                .setDebug(false)
+                .setOnClickButtonListener(new OnClickButtonListener() {
+                    @Override
+                    public void onClickButton(int which) {
+                        Log.d(TAG, Integer.toString(which));
+                    }
+                })
+                .monitor();
     }
 
     @Override
@@ -187,6 +204,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else {
             afterSignOut();
         }
+
+        AppRate.with(this).clearAgreeShowDialog();
+        AppRate.showRateDialogIfMeetsConditions(this);
     }
 
     @Override
@@ -198,6 +218,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else {
             afterSignOut();
         }
+
+        AppRate.with(this).clearAgreeShowDialog();
+        AppRate.showRateDialogIfMeetsConditions(this);
     }
 
     @Override
