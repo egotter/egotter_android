@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -71,6 +72,8 @@ import com.google.firebase.auth.OAuthProvider;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
+import java.util.Date;
+
 /**
  * The Activity demonstrates several popular Notification.Style examples along with their best
  * practices (include proper Wear support when you don't have a dedicated Wear app).
@@ -114,9 +117,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private TextView privacyPolicyText;
     private TextView openEgotterText;
     private TextView aboutThisApp;
+    private TextView lastSyncTimeText;
 
-    LinearLayout signedInLayout;
-    LinearLayout notSignedInLayout;
+    View signedInLayout;
+    View notSignedInLayout;
 
     private PeriodicWorkRequest workRequest;
 
@@ -155,9 +159,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         signInButton = findViewById(R.id.signInWithTwitter);
         currentUserButton = findViewById(R.id.currentUser);
         reauthenticateButton = findViewById(R.id.reauthenticateWithTwitter);
-        termsOfServiceText = findViewById(R.id.termsOfService);
-        privacyPolicyText = findViewById(R.id.privacyPolicy);
         openEgotterText = findViewById(R.id.openEgotter);
+        lastSyncTimeText = findViewById(R.id.lastSyncTime);
 
 //        signInButton.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -169,7 +172,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 //            }
 //        });
 
-        aboutThisApp = findViewById(R.id.about);
         // workRequest = new PeriodicWorkRequest.Builder(CheckResultWork.class, 1, TimeUnit.MINUTES).addTag(CheckResultWork.TAG).build();
         // WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(CheckResultWork.TAG, ExistingPeriodicWorkPolicy.REPLACE, workRequest);
 
@@ -222,6 +224,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     public void syncConfig(View view) {
         if (isUserSignedIn()) {
+            getInstanceId();
             sendInstanceIdToServer(true);
         }
     }
@@ -310,11 +313,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                             return;
                         }
 
-                        // Get new Instance ID token
                         String token = task.getResult().getToken();
                         saveInstanceId(token);
 
-                        // Log and toast
                         String msg = getString(R.string.msg_token_fmt, token);
                         Log.d(TAG, msg);
                     }
@@ -327,7 +328,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         editor.putString("fcm_instance_id", token);
         editor.apply();
 
-        sendInstanceIdToServer(false);
+        if (isUserSignedIn()) {
+            sendInstanceIdToServer(false);
+        }
     }
 
     private void saveCredentials(String uid, String screenName, String token, String secret) {
@@ -339,7 +342,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         editor.putString("twitter_access_secret", secret);
         editor.apply();
 
-        sendInstanceIdToServer(false);
+        if (isUserSignedIn()) {
+            sendInstanceIdToServer(false);
+        }
     }
 
     private User loadCredentials() {
@@ -362,7 +367,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        if (prefs.contains("fcm_instance_id") && prefs.contains("twitter_id") && prefs.contains("twitter_access_token") && prefs.contains("twitter_access_secret")) {
+        if (!prefs.contains("fcm_instance_id")) {
+            if (showToast) Toast.makeText(this, R.string.fetchInstanceId, Toast.LENGTH_SHORT).show();
+        }
+
+        if (prefs.contains("twitter_id") && prefs.contains("twitter_access_token") && prefs.contains("twitter_access_secret")) {
             if (showToast) Toast.makeText(this, R.string.syncNow, Toast.LENGTH_SHORT).show();
 
             HttpUtil.sendInstanceIdToServer(prefs.getString("twitter_id", ""),
@@ -371,6 +380,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     prefs.getString("twitter_access_secret", ""));
 
             lastSyncTime = System.currentTimeMillis();
+            lastSyncTimeText.setText(getString(R.string.lastSyncTimeFormat, DateFormat.format("hh:mm", new Date())));
         } else {
             Toast.makeText(this, R.string.syncFailed, Toast.LENGTH_SHORT).show();
         }
@@ -449,7 +459,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     private void afterSignIn(User user) {
+        signInButton.setVisibility(View.INVISIBLE);
         currentUserButton.setText(getString(R.string.screenNameFormat, user.screenName));
+        currentUserButton.setVisibility(View.VISIBLE);
         notSignedInLayout.setVisibility(View.INVISIBLE);
         signedInLayout.setVisibility(View.VISIBLE);
     }
@@ -464,6 +476,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void afterSignOut() {
+        currentUserButton.setVisibility(View.INVISIBLE);
+        signInButton.setVisibility(View.VISIBLE);
         signedInLayout.setVisibility(View.INVISIBLE);
         notSignedInLayout.setVisibility(View.VISIBLE);
         clearCredentials();

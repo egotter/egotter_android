@@ -10,46 +10,42 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.egotter.MainActivity">
 
-    <View
-        android:id="@+id/anchor"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_centerInParent="true" />
-
-    <ImageView
-        android:id="@+id/mascot"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/anchor"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp"
-        android:layout_marginBottom="30dp"
-        android:src="@drawable/egotter1000x1000" />
-
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/notSignedIn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/mascot"
-        android:layout_centerHorizontal="true"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/mascot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="30dp"
+            android:src="@drawable/egotter1000x1000" />
 
         <Button
             android:id="@+id/signInWithTwitter"
-            style="@style/Widget.AppCompat.Button.Borderless"
+            style="@style/Widget.AppCompat.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="20dp"
+            android:layout_below="@id/mascot"
+            android:layout_centerHorizontal="true"
             android:onClick="authenticate"
             android:text="@string/signInWithTwitter"
             android:textAllCaps="false" />
 
         <TextView
-            android:id="@+id/termsOfService"
+            style="@style/button"
+            android:layout_below="@id/signInWithTwitter"
+            android:layout_centerHorizontal="true"
+            android:onClick="openAboutThisApp"
+            android:text="@string/can_do_cannot_do" />
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_above="@id/privacyPolicy"
+            android:layout_centerHorizontal="true"
             android:onClick="openTermsOfService"
             android:text="@string/termsOfService" />
 
@@ -57,103 +53,106 @@
             android:id="@+id/privacyPolicy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
             android:onClick="openPrivacyPolicy"
             android:text="@string/privacyPolicy" />
 
-    </LinearLayout>
+    </RelativeLayout>
 
-    <LinearLayout
+    <ScrollView
         android:id="@+id/signedIn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/mascot"
+        android:layout_height="match_parent"
         android:layout_centerHorizontal="true"
-        android:orientation="vertical"
         android:visibility="invisible">
 
-        <Button
-            android:id="@+id/currentUser"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="20dp"
-            android:textAllCaps="false" />
+            android:orientation="vertical">
 
-        <View
-            android:layout_width="wrap_content"
-            android:layout_height="1dp"
-            android:background="#ccc" />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="20dp"
+                android:src="@drawable/egotter500x500" />
 
-        <TextView
-            android:id="@+id/openEgotter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:onClick="openEgotter"
-            android:text="@string/openEgotter" />
+            <Button
+                android:id="@+id/currentUser"
+                style="@style/button"
+                android:layout_gravity="center"
+                android:textAllCaps="false" />
 
-        <View
-            android:layout_width="wrap_content"
-            android:layout_height="1dp"
-            android:background="#ccc" />
+            <View style="@style/hr" />
 
-        <TextView
-            android:id="@+id/syncConfig"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:onClick="syncConfig"
-            android:text="@string/syncConfig" />
+            <TextView
+                android:id="@+id/openEgotter"
+                style="@style/button"
+                android:onClick="openEgotter"
+                android:text="@string/openEgotter" />
 
-        <View
-            android:layout_width="wrap_content"
-            android:layout_height="1dp"
-            android:background="#ccc" />
+            <View style="@style/hr" />
 
-        <TextView
-            android:id="@+id/reauthenticateWithTwitter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:onClick="reauthenticate"
-            android:text="@string/reauthenticateWithTwitter" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
-        <View
-            android:layout_width="wrap_content"
-            android:layout_height="1dp"
-            android:background="#ccc" />
+                <TextView
+                    android:id="@+id/syncConfig"
+                    style="@style/button"
+                    android:onClick="syncConfig"
+                    android:text="@string/syncConfig" />
 
-        <TextView
-            android:id="@+id/signOut"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:onClick="signOut"
-            android:text="@string/signOut" />
+                <TextView
+                    android:id="@+id/lastSyncTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp" />
+            </LinearLayout>
 
-        <View
-            android:layout_width="wrap_content"
-            android:layout_height="1dp"
-            android:background="#ccc" />
+            <View style="@style/hr" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/reauthenticateWithTwitter"
+                style="@style/button"
+                android:onClick="reauthenticate"
+                android:text="@string/reauthenticateWithTwitter" />
 
-    <TextView
-        android:id="@+id/about"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/can_do_cannot_do"
-        android:onClick="openAboutThisApp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+            <View style="@style/hr" />
+
+            <TextView
+                android:id="@+id/signOut"
+                style="@style/button"
+                android:onClick="signOut"
+                android:text="@string/signOut" />
+
+            <View style="@style/hr" />
+
+            <TextView
+                style="@style/button"
+                android:onClick="openAboutThisApp"
+                android:text="@string/can_do_cannot_do" />
+
+            <View style="@style/hr" />
+
+            <TextView
+                style="@style/button"
+                android:onClick="openTermsOfService"
+                android:text="@string/termsOfService" />
+
+            <View style="@style/hr" />
+
+            <TextView
+                style="@style/button"
+                android:onClick="openPrivacyPolicy"
+                android:text="@string/privacyPolicy" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
 </RelativeLayout>

@@ -25,7 +25,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginBottom="40dp"
-                android:src="@drawable/egotter1000x1000" />
+                android:src="@drawable/egotter500x500" />
 
             <TextView
                 style="@style/question"

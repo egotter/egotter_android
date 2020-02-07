@@ -33,6 +33,7 @@ import android.util.Log;
 import com.egotter.HttpUtil;
 import com.egotter.MainActivity;
 import com.egotter.R;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -89,7 +90,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getData().size() > 0) {
             Map<String, String> data = remoteMessage.getData();
             Log.d(TAG, "Message data payload: " + data);
-            sendNotification("data: " + data.get("title"), "data: " + data.get("body"));
+
+            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                sendNotification("data: " + data.get("title"), "data: " + data.get("body"));
+            }
 
             if (/* Check if data needs to be processed by long running job */ true) {
                 // For long-running tasks (10 seconds or more) use WorkManager.

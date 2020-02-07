@@ -43,9 +43,11 @@
 
     <string name="versionNameFormat" translatable="false">egotter %s</string>
     <string name="screenNameFormat">\@%s でログイン中</string>
+    <string name="lastSyncTimeFormat">最終同期 %s</string>
     <string name="openEgotter">えごったーを開く</string>
     <string name="syncConfig">設定を同期する</string>
     <string name="syncNow">えごったーと設定を同期しています</string>
+    <string name="fetchInstanceId">通知設定を更新中</string>
     <string name="syncFailed">同期に失敗しました</string>
 
     <string name="signInWithTwitter">Twitter でログインする</string>
@@ -56,7 +58,7 @@
     <string name="can_do_cannot_do">このアプリで出来ること</string>
     <string name="about">このアプリについて</string>
 
-    <string name="signOutConfirmationMessage">ログアウトしてもよろしいですか？</string>
+    <string name="signOutConfirmationMessage">ログアウトするとリムられ通知がスマートフォンに届かなくなります。本当にログアウトしますか？</string>
     <string name="signOutConfirmationOk">はい</string>
     <string name="signOutConfirmationCancel">いいえ</string>
 
