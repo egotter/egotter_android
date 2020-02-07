@@ -40,4 +40,16 @@
         This Activity would handle the messaging app\'s functionality for a chat(s).
         \n\nThe notification type for this example was the Messaging Style!
     </string>
+
+    <string name="versionNameFormat" translatable="false">egotter %s</string>
+    <string name="screenNameFormat">\@%s でログイン中</string>
+    <string name="openEgotter">えごったーを開く</string>
+    <string name="syncConfig">設定を同期する</string>
+    <string name="syncNow">えごったーと設定を同期しています</string>
+
+    <string name="signInWithTwitter">Twitter でログインする</string>
+    <string name="reauthenticateWithTwitter">他のアカウントでログインする</string>
+    <string name="signOut">ログアウトする</string>
+    <string name="termsOfService">利用規約</string>
+    <string name="privacyPolicy">プライバシーポリシー</string>
 </resources>

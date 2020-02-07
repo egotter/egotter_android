@@ -15,10 +15,8 @@ limitations under the License.
  */
 package com.egotter;
 
-import android.app.Activity;
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
@@ -30,6 +28,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -54,9 +53,7 @@ import androidx.core.app.Person;
 import androidx.core.app.RemoteInput;
 import androidx.core.app.TaskStackBuilder;
 import androidx.core.content.ContextCompat;
-import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
-import androidx.work.WorkManager;
 
 import com.example.android.wearable.wear.common.mock.MockDatabase;
 import com.example.android.wearable.wear.common.util.NotificationUtil;
@@ -67,16 +64,12 @@ import com.egotter.handlers.BigTextMainActivity;
 import com.egotter.handlers.InboxMainActivity;
 import com.egotter.handlers.MessagingIntentService;
 import com.egotter.handlers.MessagingMainActivity;
-import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.OAuthCredential;
 import com.google.firebase.auth.OAuthProvider;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * The Activity demonstrates several popular Notification.Style examples along with their best
@@ -114,6 +107,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private RelativeLayout mMainRelativeLayout;
     private Spinner mSpinner;
     private TextView mNotificationDetailsTextView;
+    private TextView signInButton;
+    private TextView currentUserButton;
+    private TextView reauthenticateButton;
+    private TextView termsOfServiceText;
+    private TextView privacyPolicyText;
+    private TextView openEgotterText;
+    private TextView versionName;
+
+    LinearLayout signedInLayout;
+    LinearLayout notSignedInLayout;
 
     private PeriodicWorkRequest workRequest;
 
@@ -126,8 +129,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         setContentView(R.layout.activity_main);
 
         mMainRelativeLayout = (RelativeLayout) findViewById(R.id.mainRelativeLayout);
-        mNotificationDetailsTextView = (TextView) findViewById(R.id.notificationDetails);
-        mSpinner = (Spinner) findViewById(R.id.spinner);
+//        mNotificationDetailsTextView = (TextView) findViewById(R.id.notificationDetails);
+//        mSpinner = (Spinner) findViewById(R.id.spinner);
 
         mNotificationManagerCompat = NotificationManagerCompat.from(getApplicationContext());
 
@@ -140,14 +143,38 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // Specify the layout to use when the list of choices appears.
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner.
-        mSpinner.setAdapter(adapter);
-        mSpinner.setOnItemSelectedListener(this);
+//        mSpinner.setAdapter(adapter);
+//        mSpinner.setOnItemSelectedListener(this);
 
+        firebaseAuth = FirebaseAuth.getInstance();
+
+        signedInLayout = findViewById(R.id.signedIn);
+        notSignedInLayout = findViewById(R.id.notSignedIn);
+
+        signInButton = findViewById(R.id.signInWithTwitter);
+        currentUserButton = findViewById(R.id.currentUser);
+        reauthenticateButton = findViewById(R.id.reauthenticateWithTwitter);
+        termsOfServiceText = findViewById(R.id.termsOfService);
+        privacyPolicyText = findViewById(R.id.privacyPolicy);
+        openEgotterText = findViewById(R.id.openEgotter);
+
+//        signInButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (isUserSignedIn()) {
+//                } else {
+//                    signInWithTwitter(signInButton);
+//                }
+//            }
+//        });
+        if (isUserSignedIn()) {
+            afterSignIn(getCurrentUser());
+        }
+
+        versionName = findViewById(R.id.versionName);
+        versionName.setText(getString(R.string.versionNameFormat, getVersionName()));
         // workRequest = new PeriodicWorkRequest.Builder(CheckResultWork.class, 1, TimeUnit.MINUTES).addTag(CheckResultWork.TAG).build();
         // WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(CheckResultWork.TAG, ExistingPeriodicWorkPolicy.REPLACE, workRequest);
-
-        FirebaseAuth.getInstance().signOut();
-        firebaseAuth = FirebaseAuth.getInstance();
 
         getInstanceId();
     }
@@ -169,6 +196,40 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
         // Required
+    }
+
+    public void openEgotter(View view) {
+        if (isUserSignedIn()) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("https://egotter.com/timelines/" + getCurrentUser().screenName + "?via=" + getCurrentVia()));
+            startActivity(intent);
+        }
+    }
+
+    public void syncConfig(View view) {
+        if (isUserSignedIn()) {
+            sendInstanceIdToServer();
+        }
+    }
+
+    public void openTermsOfService(View view) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse("https://egotter.com/terms_of_service?via=" + getCurrentVia()));
+        startActivity(intent);
+    }
+
+    public void openPrivacyPolicy(View view) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse("https://egotter.com/privacy_policy?via=" + getCurrentVia()));
+        startActivity(intent);
+    }
+
+    private String getCurrentVia() {
+        return "android" + getVersionName();
+    }
+
+    private String getVersionName() {
+        return BuildConfig.VERSION_NAME;
     }
 
     public void onClick(View view) {
@@ -247,47 +308,57 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         editor.putString("fcm_instance_id", token);
         editor.apply();
 
-        Toast.makeText(this, token, Toast.LENGTH_SHORT).show();
-        sendInstanceIdToServer(null);
+        sendInstanceIdToServer();
     }
 
-    private void saveCredentials(String uid, String token, String secret) {
+    private void saveCredentials(String uid, String screenName, String token, String secret) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("twitter_id", uid);
+        editor.putString("twitter_screen_name", screenName);
         editor.putString("twitter_access_token", token);
         editor.putString("twitter_access_secret", secret);
         editor.apply();
 
-        Toast.makeText(this, uid, Toast.LENGTH_SHORT).show();
-        sendInstanceIdToServer(null);
+        sendInstanceIdToServer();
     }
 
-    public void sendInstanceIdToServer(View view) {
+    private User loadCredentials() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        return new User(prefs.getString("twitter_id", ""),
+                prefs.getString("twitter_screen_name", ""),
+                prefs.getString("twitter_access_token", ""),
+                prefs.getString("twitter_access_secret", ""));
+    }
+
+    public void sendInstanceIdToServer() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if (prefs.contains("fcm_instance_id") && prefs.contains("twitter_id") && prefs.contains("twitter_access_token") && prefs.contains("twitter_access_secret")) {
+            Toast.makeText(this, R.string.syncNow, Toast.LENGTH_SHORT).show();
+
             HttpUtil.sendInstanceIdToServer(prefs.getString("twitter_id", ""),
                     prefs.getString("fcm_instance_id", ""),
                     prefs.getString("twitter_access_token", ""),
                     prefs.getString("twitter_access_secret", ""));
+        } else {
+
         }
     }
 
-    public FirebaseUser getCurrentUser() {
-        if (Build.FINGERPRINT.contains("sdk_google_phone_x86")) {
+    private boolean isUserSignedIn() {
+        return getCurrentUser() != null;
+    }
+
+    public User getCurrentUser() {
+        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+        if (firebaseUser == null) {
             return null;
         } else {
-            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-            return currentUser;
+            return loadCredentials();
         }
     }
 
-    public void signInWithTwitter(View view) {
-
-        Log.d(TAG, "signInWithTwitter()");
-
-//        openEgotterSettings();
-
+    public void signInWithTwitter(boolean forceLogin) {
         Task<AuthResult> pendingResultTask = firebaseAuth.getPendingAuthResult();
         if (pendingResultTask != null) {
             // There's something already here! Finish the sign-in for your user.
@@ -296,7 +367,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                             new OnSuccessListener<AuthResult>() {
                                 @Override
                                 public void onSuccess(AuthResult authResult) {
-                                    Log.d(TAG, "signInWithTwitter() pending result is found");
+                                    User user = new User(authResult);
+                                    afterSignIn(user);
+                                    saveCredentials(user.uid, user.screenName, user.token, user.secret);
                                 }
                             })
                     .addOnFailureListener(
@@ -310,6 +383,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else {
             OAuthProvider.Builder provider = OAuthProvider.newBuilder("twitter.com");
             provider.addCustomParameter("lang", "ja");
+            if (forceLogin) {
+                provider.addCustomParameter("force_login", String.valueOf(forceLogin));
+            }
 
             firebaseAuth
                     .startActivityForSignInWithProvider(this, provider.build())
@@ -317,11 +393,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                             new OnSuccessListener<AuthResult>() {
                                 @Override
                                 public void onSuccess(AuthResult authResult) {
-                                    Log.d(TAG, authResult.getAdditionalUserInfo().getProfile().toString());
-
-                                    String uid = String.valueOf(authResult.getAdditionalUserInfo().getProfile().get("id"));
-                                    OAuthCredential credential = (OAuthCredential) authResult.getCredential();
-                                    saveCredentials(uid, credential.getAccessToken(), credential.getSecret());
+                                    User user = new User(authResult);
+                                    afterSignIn(user);
+                                    saveCredentials(user.uid, user.screenName, user.token, user.secret);
                                 }
                             })
                     .addOnFailureListener(
@@ -333,6 +407,26 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                 }
                             });
         }
+    }
+
+    public void authenticate(View view){
+        signInWithTwitter(false);
+    }
+
+    public void reauthenticate(View view){
+        signInWithTwitter(true);
+    }
+
+    private void afterSignIn(User user) {
+        currentUserButton.setText(getString(R.string.screenNameFormat, user.screenName));
+        notSignedInLayout.setVisibility(View.INVISIBLE);
+        signedInLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void signOut(View view) {
+        firebaseAuth.signOut();
+        signedInLayout.setVisibility(View.INVISIBLE);
+        notSignedInLayout.setVisibility(View.VISIBLE);
     }
 
     /*

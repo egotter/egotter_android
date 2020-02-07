@@ -36,6 +36,7 @@ import com.egotter.R;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import androidx.core.content.ContextCompat;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
@@ -200,6 +201,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         .setContentText(body)
                         .setAutoCancel(true)
                         .setSound(defaultSoundUri)
+                        .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary))
                         .setContentIntent(pendingIntent);
 
         NotificationManager notificationManager =

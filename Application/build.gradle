@@ -1,23 +1,6 @@
 
-buildscript {
-    repositories {
-        google()
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.3'
-        classpath 'com.google.gms:google-services:4.3.3'
-    }
-}
-
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
-
-repositories {
-    google()
-    jcenter()
-}
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
@@ -51,8 +34,8 @@ android {
         applicationId "com.egotter"
         minSdkVersion 18
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.2"
     }
 
     compileOptions {

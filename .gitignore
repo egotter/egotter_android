@@ -86,3 +86,4 @@ lint/tmp/
 
 /.idea
 /Application/google-services.json
+/release.keystore
