@@ -46,10 +46,32 @@
     <string name="openEgotter">えごったーを開く</string>
     <string name="syncConfig">設定を同期する</string>
     <string name="syncNow">えごったーと設定を同期しています</string>
+    <string name="syncFailed">同期に失敗しました</string>
 
     <string name="signInWithTwitter">Twitter でログインする</string>
     <string name="reauthenticateWithTwitter">他のアカウントでログインする</string>
     <string name="signOut">ログアウトする</string>
     <string name="termsOfService">利用規約</string>
     <string name="privacyPolicy">プライバシーポリシー</string>
+    <string name="can_do_cannot_do">このアプリで出来ること</string>
+    <string name="about">このアプリについて</string>
+
+    <string name="signOutConfirmationMessage">ログアウトしてもよろしいですか？</string>
+    <string name="signOutConfirmationOk">はい</string>
+    <string name="signOutConfirmationCancel">いいえ</string>
+
+    <string name="q1">このアプリでは何ができますか？</string>
+    <string name="a1">このアプリは、えごったーのリムられ通知のために作られました。このアプリをインストールしていると、えごったーのリムられ通知がより正確に、早く、スマートフォンに対して直接届くようになります。</string>
+
+    <string name="q2">えごったーとは何ですか？</string>
+    <string name="a2">累計で650万回以上使われている、日本最大級のツイッター分析サイトです。https://egotter.com</string>
+
+    <string name="q3">リムられ通知とは何ですか？</string>
+    <string name="a3">えごったーには、フォロワーの増減を通知する機能があります。この機能のことをリムられ通知と呼んでいます。通常、リムられ通知はツイッターのDMで届きますが、このアプリを入れていると、スマートフォンに直接通知が届くようになります。</string>
+
+    <string name="q4">今までのリムられ通知と何が違いますか？</string>
+    <string name="a4">今までのリムられ通知はツイッターのDMで届いていましたが、送信の失敗や遅延が起きるという問題がありました。このアプリを入れていれば、これらの問題がなくなり、より正確で早くリムられ通知が届くようになります。</string>
+
+    <string name="q5">質問や要望はどこに送ればよいですか？</string>
+    <string name="a5">公式アカウント https://twitter.com/ego_tter までお気軽にご連絡ください。</string>
 </resources>

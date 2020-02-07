@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private TextView termsOfServiceText;
     private TextView privacyPolicyText;
     private TextView openEgotterText;
-    private TextView versionName;
+    private TextView aboutThisApp;
 
     LinearLayout signedInLayout;
     LinearLayout notSignedInLayout;
@@ -121,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private PeriodicWorkRequest workRequest;
 
     private FirebaseAuth firebaseAuth;
+    private Long lastSyncTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,12 +168,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 //                }
 //            }
 //        });
-        if (isUserSignedIn()) {
-            afterSignIn(getCurrentUser());
-        }
 
-        versionName = findViewById(R.id.versionName);
-        versionName.setText(getString(R.string.versionNameFormat, getVersionName()));
+        aboutThisApp = findViewById(R.id.about);
         // workRequest = new PeriodicWorkRequest.Builder(CheckResultWork.class, 1, TimeUnit.MINUTES).addTag(CheckResultWork.TAG).build();
         // WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(CheckResultWork.TAG, ExistingPeriodicWorkPolicy.REPLACE, workRequest);
 
@@ -182,6 +179,23 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     protected void onStart() {
         super.onStart();
+
+        if (isUserSignedIn()) {
+            afterSignIn(getCurrentUser());
+        } else {
+            afterSignOut();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (isUserSignedIn()) {
+            afterSignIn(getCurrentUser());
+        } else {
+            afterSignOut();
+        }
     }
 
     @Override
@@ -208,7 +222,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     public void syncConfig(View view) {
         if (isUserSignedIn()) {
-            sendInstanceIdToServer();
+            sendInstanceIdToServer(true);
         }
     }
 
@@ -221,6 +235,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void openPrivacyPolicy(View view) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse("https://egotter.com/privacy_policy?via=" + getCurrentVia()));
+        startActivity(intent);
+    }
+
+    public void openAboutThisApp(View view) {
+        Intent intent = new Intent(this, AboutThisAppActivity.class);
         startActivity(intent);
     }
 
@@ -308,7 +327,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         editor.putString("fcm_instance_id", token);
         editor.apply();
 
-        sendInstanceIdToServer();
+        sendInstanceIdToServer(false);
     }
 
     private void saveCredentials(String uid, String screenName, String token, String secret) {
@@ -320,7 +339,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         editor.putString("twitter_access_secret", secret);
         editor.apply();
 
-        sendInstanceIdToServer();
+        sendInstanceIdToServer(false);
     }
 
     private User loadCredentials() {
@@ -331,17 +350,29 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 prefs.getString("twitter_access_secret", ""));
     }
 
-    public void sendInstanceIdToServer() {
+    private void clearCredentials() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        prefs.edit().clear().apply();
+    }
+
+    public void sendInstanceIdToServer(boolean showToast) {
+        if (lastSyncTime != null && System.currentTimeMillis() - lastSyncTime < 10000) {
+            if (showToast) Toast.makeText(this, R.string.syncNow, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if (prefs.contains("fcm_instance_id") && prefs.contains("twitter_id") && prefs.contains("twitter_access_token") && prefs.contains("twitter_access_secret")) {
-            Toast.makeText(this, R.string.syncNow, Toast.LENGTH_SHORT).show();
+            if (showToast) Toast.makeText(this, R.string.syncNow, Toast.LENGTH_SHORT).show();
 
             HttpUtil.sendInstanceIdToServer(prefs.getString("twitter_id", ""),
                     prefs.getString("fcm_instance_id", ""),
                     prefs.getString("twitter_access_token", ""),
                     prefs.getString("twitter_access_secret", ""));
-        } else {
 
+            lastSyncTime = System.currentTimeMillis();
+        } else {
+            Toast.makeText(this, R.string.syncFailed, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -424,9 +455,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void signOut(View view) {
+        new SignOutConfirmationDialogFragment().show(getSupportFragmentManager(), "SignOutConfirmation");
+    }
+
+    public void doSignOut() {
         firebaseAuth.signOut();
+        afterSignOut();
+    }
+
+    public void afterSignOut() {
         signedInLayout.setVisibility(View.INVISIBLE);
         notSignedInLayout.setVisibility(View.VISIBLE);
+        clearCredentials();
     }
 
     /*

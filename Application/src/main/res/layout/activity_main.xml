@@ -23,7 +23,7 @@
         android:layout_above="@id/anchor"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="30dp"
         android:src="@drawable/egotter1000x1000" />
 
     <LinearLayout
@@ -149,9 +149,11 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/versionName"
+        android:id="@+id/about"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="@string/can_do_cannot_do"
+        android:onClick="openAboutThisApp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
 </RelativeLayout>
