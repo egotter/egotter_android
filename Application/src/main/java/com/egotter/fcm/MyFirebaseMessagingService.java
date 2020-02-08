@@ -92,7 +92,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Log.d(TAG, "Message data payload: " + data);
 
             if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-                sendNotification("data: " + data.get("title"), "data: " + data.get("body"));
+                sendNotification(data.get("title"), data.get("body"));
             }
 
             if (/* Check if data needs to be processed by long running job */ true) {
