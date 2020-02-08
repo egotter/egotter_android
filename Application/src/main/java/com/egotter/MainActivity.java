@@ -370,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void sendInstanceIdToServer(boolean showToast) {
-        if (lastSyncTime != null && System.currentTimeMillis() - lastSyncTime < 10000) {
+        if (lastSyncTime != null && System.currentTimeMillis() - lastSyncTime < 60000) {
             if (showToast) Toast.makeText(this, R.string.syncNow, Toast.LENGTH_SHORT).show();
             return;
         }

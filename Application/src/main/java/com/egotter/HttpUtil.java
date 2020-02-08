@@ -17,9 +17,9 @@ import java.net.URL;
 public class HttpUtil {
 
     public static final String TAG = HttpUtil.class.getSimpleName();
-    // public static final String URL = "https://egotter.com/api/v1/users/update_instance_id";
+    public static final String URL = "https://egotter.com/api/v1/users/update_instance_id";
     // public static final String URL = "http://10.0.2.2:3000/api/v1/users/update_instance_id";
-    public static final String URL = "http://192.168.11.2:3000/api/v1/users/update_instance_id";
+    // public static final String URL = "http://192.168.11.2:3000/api/v1/users/update_instance_id";
 
     public static void sendInstanceIdToServer(String uid, String instanceId, String accessToken, String accessSecret) {
 
