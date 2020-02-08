@@ -178,8 +178,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // workRequest = new PeriodicWorkRequest.Builder(CheckResultWork.class, 1, TimeUnit.MINUTES).addTag(CheckResultWork.TAG).build();
         // WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(CheckResultWork.TAG, ExistingPeriodicWorkPolicy.REPLACE, workRequest);
 
-        getInstanceId();
-
         AppRate.with(this)
                 .setInstallDays(3)
                 .setLaunchTimes(10)
@@ -196,22 +194,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        if (isUserSignedIn()) {
-            afterSignIn(getCurrentUser());
-        } else {
-            afterSignOut();
-        }
-
-        AppRate.with(this).clearAgreeShowDialog();
-        AppRate.showRateDialogIfMeetsConditions(this);
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
+
+        getInstanceId();
 
         if (isUserSignedIn()) {
             afterSignIn(getCurrentUser());
