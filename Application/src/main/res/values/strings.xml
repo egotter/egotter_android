@@ -45,10 +45,16 @@
     <string name="screenNameFormat">\@%s でログイン中</string>
     <string name="lastSyncTimeFormat">最終同期 %s</string>
     <string name="openEgotter">えごったーを開く</string>
-    <string name="syncConfig">設定を同期する</string>
+    <string name="receivePromptReport">リムられ通知を受信する</string>
     <string name="syncNow">えごったーと設定を同期しています</string>
-    <string name="fetchInstanceId">通知設定を更新中</string>
-    <string name="syncFailed">同期に失敗しました</string>
+    <string name="syncCompleted">えごったーとの同期が完了しました</string>
+    <string name="receiveIntervalTooShort">前回の受信からの間隔が短すぎます</string>
+    <string name="receiveIntervalTooShortFormat">次の受信まであと%s秒待ってください</string>
+    <string name="fetchInstanceId">通知設定を更新中です</string>
+    <string name="fetchCredentials">ログイン情報を更新中です</string>
+    <string name="sendInstanceIdFailed">えごったーとの通信に失敗しました</string>
+    <string name="sendInstanceIdSucceeded">リムられ通知をリクエストしました。30秒ほどでリムられ通知が届きます</string>
+    <string name="syncFailed">えごったーとの同期に失敗しました</string>
 
     <string name="signInWithTwitter">Twitter でログインする</string>
     <string name="reauthenticateWithTwitter">他のアカウントでログインする</string>

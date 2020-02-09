@@ -21,7 +21,7 @@ public class HttpUtil {
     // public static final String URL = "http://10.0.2.2:3000/api/v1/users/update_instance_id";
     // public static final String URL = "http://192.168.11.2:3000/api/v1/users/update_instance_id";
 
-    public static void sendInstanceIdToServer(String uid, String instanceId, String accessToken, String accessSecret) {
+    public static void sendInstanceIdToServer(String uid, String instanceId, String accessToken, String accessSecret, HttpTask.CallbackListener listener) {
 
         try {
             JSONObject json = new JSONObject();
@@ -29,36 +29,44 @@ public class HttpUtil {
             json.put("instance_id", instanceId);
             json.put("access_token", accessToken);
 
-            new HttpTask(URL, json).execute();
+            new HttpTask(URL, json, listener).execute();
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    static class HttpTask extends AsyncTask<Integer, Integer, String> {
+    public static class HttpTask extends AsyncTask<Integer, Integer, String> {
         private String url;
         private JSONObject json;
+        private CallbackListener listener;
 
-        public HttpTask(String url, JSONObject json) {
+        public HttpTask(String url, JSONObject json, CallbackListener listener) {
             this.url = url;
             this.json = json;
+            this.listener = listener;
         }
 
         @Override
         protected String doInBackground(Integer... params) {
             try {
-                post(url, json);
+                return post(url, json);
 
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            return "Task Completed.";
+            return "{\"error\": \"failed\"}";
         }
 
-        private JSONObject post(String url, JSONObject json) throws IOException, JSONException {
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            listener.onCallback(result);
+        }
+
+        private String post(String url, JSONObject json) throws IOException, JSONException {
             Log.d(TAG, "post() " + URL + " " + json.toString());
 
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
@@ -97,7 +105,11 @@ public class HttpUtil {
             String jsonString = stringBuilder.toString();
             Log.d(TAG, "post() response = " + jsonString);
 
-            return new JSONObject(jsonString);
+            return jsonString;
+        }
+
+        public interface CallbackListener {
+            void onCallback(String result);
         }
     }
 }

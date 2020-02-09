@@ -54,7 +54,7 @@ import java.util.Map;
  *   <action android:name="com.google.firebase.MESSAGING_EVENT" />
  * </intent-filter>
  */
-public class MyFirebaseMessagingService extends FirebaseMessagingService {
+public class MyFirebaseMessagingService extends FirebaseMessagingService implements HttpUtil.HttpTask.CallbackListener {
 
     private static final String TAG = "MyFirebaseMsgService";
 
@@ -181,8 +181,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             HttpUtil.sendInstanceIdToServer(prefs.getString("twitter_id", ""),
                     prefs.getString("fcm_instance_id", ""),
                     prefs.getString("twitter_access_token", ""),
-                    prefs.getString("twitter_access_secret", ""));
+                    prefs.getString("twitter_access_secret", ""),
+                    MyFirebaseMessagingService.this);
         }
+    }
+
+    @Override
+    public void onCallback(String result) {
+
     }
 
     /**

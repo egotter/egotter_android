@@ -29,12 +29,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.egotter.HttpUtil.HttpTask.CallbackListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -72,6 +72,9 @@ import com.google.firebase.auth.OAuthProvider;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Date;
 
 import hotchemi.android.rate.AppRate;
@@ -81,11 +84,13 @@ import hotchemi.android.rate.OnClickButtonListener;
  * The Activity demonstrates several popular Notification.Style examples along with their best
  * practices (include proper Wear support when you don't have a dedicated Wear app).
  */
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, CallbackListener {
 
     public static final String TAG = "MainActivity";
 
     public static final int NOTIFICATION_ID = 888;
+
+    private static final int SEND_INSTANCE_ID_INTERVAL = 60000;
 
     // Used for Notification Style array and switch statement for Spinner selection.
     private static final String BIG_TEXT_STYLE = "BIG_TEXT_STYLE";
@@ -231,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
     }
 
-    public void syncConfig(View view) {
+    public void receivePromptReport(View view) {
         if (isUserSignedIn()) {
             getInstanceId();
             sendInstanceIdToServer(true);
@@ -369,29 +374,50 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         prefs.edit().clear().apply();
     }
 
-    public void sendInstanceIdToServer(boolean showToast) {
-        if (lastSyncTime != null && System.currentTimeMillis() - lastSyncTime < 60000) {
-            if (showToast) Toast.makeText(this, R.string.syncNow, Toast.LENGTH_SHORT).show();
+    public void sendInstanceIdToServer(boolean isUserRequested) {
+        if (lastSyncTime != null && System.currentTimeMillis() - lastSyncTime < SEND_INSTANCE_ID_INTERVAL) {
+            if (isUserRequested) {
+                long elapsed = SEND_INSTANCE_ID_INTERVAL - (System.currentTimeMillis() - lastSyncTime);
+                String message = getString(R.string.receiveIntervalTooShortFormat, String.valueOf(elapsed / 1000));
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            }
             return;
         }
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        if (!prefs.contains("fcm_instance_id")) {
-            if (showToast) Toast.makeText(this, R.string.fetchInstanceId, Toast.LENGTH_SHORT).show();
+        String instanceId = prefs.getString("fcm_instance_id", "");
+        if (instanceId.equals("")) {
+            if (isUserRequested) Toast.makeText(this, R.string.fetchInstanceId, Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        if (prefs.contains("twitter_id") && prefs.contains("twitter_access_token") && prefs.contains("twitter_access_secret")) {
-            if (showToast) Toast.makeText(this, R.string.syncNow, Toast.LENGTH_SHORT).show();
+        String twitterUid = prefs.getString("twitter_id", "");
+        String accessToken = prefs.getString("twitter_access_token", "");
+        String accessSecret = prefs.getString("twitter_access_secret", "");
+        if (twitterUid.equals("") || accessToken.equals("") || accessSecret.equals("")) {
+            if (isUserRequested) Toast.makeText(this, R.string.fetchCredentials, Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-            HttpUtil.sendInstanceIdToServer(prefs.getString("twitter_id", ""),
-                    prefs.getString("fcm_instance_id", ""),
-                    prefs.getString("twitter_access_token", ""),
-                    prefs.getString("twitter_access_secret", ""));
+        HttpUtil.sendInstanceIdToServer(twitterUid, instanceId, accessToken, accessSecret, MainActivity.this);
 
-            lastSyncTime = System.currentTimeMillis();
-            lastSyncTimeText.setText(getString(R.string.lastSyncTimeFormat, DateFormat.format("hh:mm", new Date())));
-        } else {
-            Toast.makeText(this, R.string.syncFailed, Toast.LENGTH_SHORT).show();
+        lastSyncTime = System.currentTimeMillis();
+        lastSyncTimeText.setText(getString(R.string.lastSyncTimeFormat, DateFormat.format("hh:mm", new Date())));
+    }
+
+
+    public void onCallback(String result) {
+        Log.d(TAG, "HttpTask result " + result);
+
+        try {
+            JSONObject json = new JSONObject(result);
+            if (json.has("error") && !json.getString("error").equals("")) {
+                Toast.makeText(this, R.string.sendInstanceIdFailed, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, R.string.sendInstanceIdSucceeded, Toast.LENGTH_LONG).show();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
@@ -1174,12 +1200,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
         intent.putExtra("app_package", getPackageName());
         intent.putExtra("app_uid", getApplicationInfo().uid);
-        startActivity(intent);
-    }
-
-    private void openEgotterSettings() {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse("https://egotter.com/settings?via=android"));
         startActivity(intent);
     }
 }
