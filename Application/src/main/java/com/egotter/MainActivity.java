@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         currentUserButton = findViewById(R.id.currentUser);
         reauthenticateButton = findViewById(R.id.reauthenticateWithTwitter);
         openEgotterText = findViewById(R.id.openEgotter);
-        lastSyncTimeText = findViewById(R.id.lastSyncTime);
+//        lastSyncTimeText = findViewById(R.id.lastSyncTime);
 
 //        signInButton.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -402,7 +402,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         HttpUtil.sendInstanceIdToServer(twitterUid, instanceId, accessToken, accessSecret, MainActivity.this);
 
         lastSyncTime = System.currentTimeMillis();
-        lastSyncTimeText.setText(getString(R.string.lastSyncTimeFormat, DateFormat.format("hh:mm", new Date())));
+//        lastSyncTimeText.setText(getString(R.string.lastSyncTimeFormat, DateFormat.format("hh:mm", new Date())));
     }
 
 

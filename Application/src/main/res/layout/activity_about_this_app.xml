@@ -37,6 +37,14 @@
 
             <TextView
                 style="@style/question"
+                android:text="@string/q1_2" />
+
+            <TextView
+                style="@style/answer"
+                android:text="@string/a1_2" />
+
+            <TextView
+                style="@style/question"
                 android:text="@string/q2" />
 
             <TextView
