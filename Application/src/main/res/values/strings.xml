@@ -53,7 +53,7 @@
     <string name="fetchInstanceId">通知設定を更新中です</string>
     <string name="fetchCredentials">ログイン情報を更新中です</string>
     <string name="sendInstanceIdFailed">えごったーとの通信に失敗しました</string>
-    <string name="sendInstanceIdSucceeded">リムられ通知をリクエストしました。30秒ほどでリムられ通知が届きます</string>
+    <string name="sendInstanceIdSucceeded">通知をリクエストしました。規定の時間が経過していればリムられ通知が届きます</string>
     <string name="syncFailed">えごったーとの同期に失敗しました</string>
 
     <string name="signInWithTwitter">Twitter でログインする</string>
