@@ -453,7 +453,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
                                     // Handle failure.
-                                    Log.e(TAG, "signInWithTwitter() pending result is failed");
+                                    Log.e(TAG, "signInWithTwitter() pendingResultTask is failed");
+                                    e.printStackTrace();
                                 }
                             });
         } else {
@@ -480,6 +481,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                 public void onFailure(@NonNull Exception e) {
                                     // Handle failure.
                                     Log.e(TAG, "signInWithTwitter() signIn is failed");
+                                    e.printStackTrace();
                                 }
                             });
         }
