@@ -37,7 +37,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
 import com.egotter.BuildConfig;
-import com.egotter.HttpUtil;
+import com.egotter.ApiClient;
 import com.egotter.MainActivity;
 import com.egotter.R;
 import com.example.android.wearable.wear.common.mock.MockDatabase;
@@ -59,7 +59,7 @@ import java.util.Map;
  *   <action android:name="com.google.firebase.MESSAGING_EVENT" />
  * </intent-filter>
  */
-public class MyFirebaseMessagingService extends FirebaseMessagingService implements HttpUtil.HttpTask.CallbackListener {
+public class MyFirebaseMessagingService extends FirebaseMessagingService implements ApiClient.HttpTask.CallbackListener {
 
     private static final String TAG = "MyFirebaseMsgService";
 
@@ -182,7 +182,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService impleme
     private void sendInstanceIdToServer() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if (prefs.contains("fcm_instance_id") && prefs.contains("twitter_id") && prefs.contains("twitter_access_token") && prefs.contains("twitter_access_secret")) {
-            HttpUtil.sendInstanceIdToServer(prefs.getString("twitter_id", ""),
+            ApiClient.sendInstanceIdToServer(prefs.getString("twitter_id", ""),
                     prefs.getString("fcm_instance_id", ""),
                     prefs.getString("twitter_access_token", ""),
                     prefs.getString("twitter_access_secret", ""),

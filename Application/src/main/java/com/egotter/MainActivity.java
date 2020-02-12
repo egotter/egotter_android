@@ -24,7 +24,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -34,7 +33,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.egotter.HttpUtil.HttpTask.CallbackListener;
+import com.egotter.ApiClient.HttpTask.CallbackListener;
+import com.egotter.dialogs.OpenPlayStoreDialogFragment;
+import com.egotter.dialogs.SignOutConfirmationDialogFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -74,8 +75,6 @@ import com.google.firebase.iid.InstanceIdResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Date;
 
 import hotchemi.android.rate.AppRate;
 import hotchemi.android.rate.OnClickButtonListener;
@@ -395,7 +394,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             return;
         }
 
-        HttpUtil.sendInstanceIdToServer(twitterUid, instanceId, accessToken, accessSecret, MainActivity.this);
+        ApiClient.sendInstanceIdToServer(twitterUid, instanceId, accessToken, accessSecret, MainActivity.this);
 
         lastSyncTime = System.currentTimeMillis();
 //        lastSyncTimeText.setText(getString(R.string.lastSyncTimeFormat, DateFormat.format("hh:mm", new Date())));
@@ -407,6 +406,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         try {
             JSONObject json = new JSONObject(result);
+            if (json.has("version_code")) {
+                int versionCode = json.getInt("version_code");
+                if (BuildConfig.VERSION_CODE < versionCode) {
+                    new OpenPlayStoreDialogFragment().show(getSupportFragmentManager(), "OpenPlayStore");
+                    return;
+                }
+            }
             if (json.has("error") && !json.getString("error").equals("")) {
                 Toast.makeText(this, R.string.sendInstanceIdFailed, Toast.LENGTH_SHORT).show();
             } else {

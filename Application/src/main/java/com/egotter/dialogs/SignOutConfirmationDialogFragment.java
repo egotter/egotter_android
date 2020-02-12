@@ -1,4 +1,4 @@
-package com.egotter;
+package com.egotter.dialogs;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -7,6 +7,9 @@ import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
+
+import com.egotter.MainActivity;
+import com.egotter.R;
 
 public class SignOutConfirmationDialogFragment extends DialogFragment {
     @Override

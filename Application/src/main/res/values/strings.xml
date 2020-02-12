@@ -70,6 +70,9 @@
     <string name="signOutConfirmationOk">はい</string>
     <string name="signOutConfirmationCancel">いいえ</string>
 
+    <string name="openPlayStoreMessage">新しいバージョンが公開されました。お手数ですが、Google Playで最新バージョンのアプリをインストールしてください。</string>
+    <string name="openPlayStoreOk">はい</string>
+
     <string name="q1">このアプリでは何ができますか？</string>
     <string name="a1">このアプリは、えごったーのリムられ通知のために作られました。このアプリをインストールしていると、えごったーのリムられ通知がより正確に、早く、スマートフォンに対して直接届くようになります。</string>
 
