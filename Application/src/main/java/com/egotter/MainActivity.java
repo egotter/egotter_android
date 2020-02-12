@@ -261,11 +261,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     private String getCurrentVia() {
-        return "android" + getVersionName();
-    }
-
-    private String getVersionName() {
-        return BuildConfig.VERSION_NAME;
+        return "android" + BuildConfig.VERSION_NAME;
     }
 
     public void onClick(View view) {
@@ -465,7 +461,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
 
             firebaseAuth
-                    .startActivityForSignInWithProvider(this, provider.build())
+                    .startActivityForSignInWithProvider(MainActivity.this, provider.build())
                     .addOnSuccessListener(
                             new OnSuccessListener<AuthResult>() {
                                 @Override

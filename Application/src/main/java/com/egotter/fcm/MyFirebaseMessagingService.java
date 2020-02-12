@@ -16,30 +16,35 @@
 
 package com.egotter.fcm;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-import androidx.core.app.NotificationCompat;
-
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.egotter.HttpUtil;
-import com.egotter.MainActivity;
-import com.egotter.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.messaging.FirebaseMessagingService;
-import com.google.firebase.messaging.RemoteMessage;
-
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
+
+import com.egotter.BuildConfig;
+import com.egotter.HttpUtil;
+import com.egotter.MainActivity;
+import com.egotter.R;
+import com.example.android.wearable.wear.common.mock.MockDatabase;
+import com.example.android.wearable.wear.common.util.NotificationUtil;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Map;
 
@@ -92,7 +97,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService impleme
             Log.d(TAG, "Message data payload: " + data);
 
             if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-                sendNotification(data.get("title"), data.get("body"));
+                sendPushNotification(data.get("title"), data.get("body"), data);
             }
 
             if (/* Check if data needs to be processed by long running job */ true) {
@@ -109,7 +114,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService impleme
         if (remoteMessage.getNotification() != null) {
             RemoteMessage.Notification notification = remoteMessage.getNotification();
             Log.d(TAG, "Message Notification Body: " + notification.getBody());
-            sendNotification("notif: " + notification.getTitle(), "notif: " + notification.getBody());
         }
 
         // Also if you intend on generating your own notifications as a result of a received FCM
@@ -194,9 +198,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService impleme
     /**
      * Create and show a simple notification containing the received FCM message.
      *
-     * @param body FCM message body received.
+     * @param messageBody FCM message body received.
      */
-    private void sendNotification(String title, String body) {
+    private void sendNotification(String messageBody) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
@@ -206,12 +210,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService impleme
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
-                        .setSmallIcon(R.drawable.ic_stat_name)
-                        .setContentTitle(title)
-                        .setContentText(body)
+                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setContentTitle(getString(R.string.fcm_message))
+                        .setContentText(messageBody)
                         .setAutoCancel(true)
                         .setSound(defaultSoundUri)
-                        .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary))
                         .setContentIntent(pendingIntent);
 
         NotificationManager notificationManager =
@@ -226,5 +229,68 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService impleme
         }
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+    }
+
+    private void sendPushNotification(String title, String body, Map<String, String> payload) {
+
+        MockDatabase.BigTextStyleReminderAppData bigTextStyleReminderAppData =
+                MockDatabase.getBigTextStyleData();
+
+        String notificationChannelId =
+                NotificationUtil.createNotificationChannel(this, bigTextStyleReminderAppData);
+
+        Intent openUrlIntent = new Intent(Intent.ACTION_VIEW);
+        openUrlIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        openUrlIntent.setData(Uri.parse(
+                "https://egotter.com/timelines/" + payload.get("screen_name") + "?via=" + getCurrentVia()));
+
+        PendingIntent notifyPendingIntent =
+                PendingIntent.getActivity(this, 0, openUrlIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        PendingIntent actionPendingIntent =
+                PendingIntent.getActivity(this, 0, openUrlIntent, 0);
+
+        NotificationCompat.Action openTimelineAction =
+                new NotificationCompat.Action.Builder(
+                        R.drawable.ic_alarm_white_48dp,
+                        getString(R.string.openTimeline),
+                        actionPendingIntent)
+                        .build();
+
+        NotificationCompat.Builder notificationCompatBuilder =
+                new NotificationCompat.Builder(
+                        getApplicationContext(), notificationChannelId);
+
+        NotificationCompat.Builder notificationBuilder = notificationCompatBuilder
+                .setSmallIcon(R.drawable.ic_stat_name)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_alarm_white_48dp))
+                .setContentIntent(notifyPendingIntent)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary))
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .addAction(openTimelineAction);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            notificationCompatBuilder.setCategory(Notification.CATEGORY_SOCIAL);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            notificationCompatBuilder.setPriority(NotificationManager.IMPORTANCE_DEFAULT);
+        }
+
+        if (title != null && !title.equals("")) {
+            notificationBuilder.setContentTitle(title);
+        }
+
+        if (body != null && !body.equals("")) {
+            notificationBuilder.setContentText(body);
+        }
+
+        NotificationManagerCompat.from(getApplicationContext()).
+                notify(MainActivity.NOTIFICATION_ID, notificationBuilder.build());
+    }
+
+    private String getCurrentVia() {
+        return "android" + BuildConfig.VERSION_NAME;
     }
 }

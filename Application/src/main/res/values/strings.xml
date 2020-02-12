@@ -56,6 +56,8 @@
     <string name="sendInstanceIdSucceeded">通知をリクエストしました。規定の時間が経過していればリムられ通知が届きます</string>
     <string name="syncFailed">えごったーとの同期に失敗しました</string>
 
+    <string name="openTimeline">えごったーで見る</string>
+
     <string name="signInWithTwitter">Twitter でログインする</string>
     <string name="reauthenticateWithTwitter">他のアカウントでログインする</string>
     <string name="signOut">ログアウトする</string>
@@ -82,6 +84,9 @@
 
     <string name="q4">今までのリムられ通知と何が違いますか？</string>
     <string name="a4">今までのリムられ通知はツイッターのDMで届いていましたが、送信の失敗や遅延が起きるという問題がありました。このアプリを入れていれば、これらの問題がなくなり、より正確で早くリムられ通知が届くようになります。</string>
+
+    <string name="q4_2">リムられ通知はツイッターのDMとスマートフォン通知の両方に届きますか？</string>
+    <string name="a4_2">このアプリを入れていると、スマートフォン通知のみに届くようになります。</string>
 
     <string name="q5">質問や要望はどこに送ればよいですか？</string>
     <string name="a5">公式アカウント https://twitter.com/ego_tter までお気軽にご連絡ください。</string>
