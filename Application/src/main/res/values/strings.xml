@@ -49,7 +49,7 @@
     <string name="syncNow">えごったーと設定を同期しています</string>
     <string name="syncCompleted">えごったーとの同期が完了しました</string>
     <string name="receiveIntervalTooShort">前回の受信からの間隔が短すぎます</string>
-    <string name="receiveIntervalTooShortFormat">次の受信まであと%s秒待ってください</string>
+    <string name="sendInstanceIdToServerIntervalTooShortFormat">次のリクエストまであと%s秒待ってください</string>
     <string name="fetchInstanceId">通知設定を更新中です</string>
     <string name="fetchCredentials">ログイン情報を更新中です</string>
     <string name="sendInstanceIdFailed">えごったーとの通信に失敗しました</string>
@@ -57,6 +57,13 @@
     <string name="syncFailed">えごったーとの同期に失敗しました</string>
 
     <string name="openTimeline">えごったーで見る</string>
+
+    <string name="oneSidedFriendsCount">片思いフォロー %s人</string>
+    <string name="oneSidedFollowersCount">片思われフォロワー %s人</string>
+    <string name="mutualFriendsCount">両思いフォロー %s人</string>
+    <string name="unfriendsCount">リムーブした %s人</string>
+    <string name="unfollowersCount">リムーブされた %s人</string>
+    <string name="blockingOrBlockedCount">ブロックされた %s人</string>
 
     <string name="signInWithTwitter">Twitter でログインする</string>
     <string name="reauthenticateWithTwitter">他のアカウントでログインする</string>

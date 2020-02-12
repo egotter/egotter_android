@@ -33,11 +33,12 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
-import com.egotter.BuildConfig;
 import com.egotter.ApiClient;
+import com.egotter.BuildConfig;
 import com.egotter.MainActivity;
 import com.egotter.R;
 import com.example.android.wearable.wear.common.mock.MockDatabase;
@@ -59,7 +60,7 @@ import java.util.Map;
  *   <action android:name="com.google.firebase.MESSAGING_EVENT" />
  * </intent-filter>
  */
-public class MyFirebaseMessagingService extends FirebaseMessagingService implements ApiClient.HttpTask.CallbackListener {
+public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
 
@@ -98,6 +99,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService impleme
 
             if (FirebaseAuth.getInstance().getCurrentUser() != null) {
                 sendPushNotification(data.get("title"), data.get("body"), data);
+
+                if (data.containsKey("one_sided_friends")) {
+                    saveSummaryItemsList(data);
+                }
             }
 
             if (/* Check if data needs to be processed by long running job */ true) {
@@ -179,6 +184,23 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService impleme
         sendInstanceIdToServer();
     }
 
+    private void saveSummaryItemsList(Map<String, String> summaryPayload) {
+        Log.d(TAG, "saveSummaryItemsList() summaryPayload " + summaryPayload);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("one_sided_friends", summaryPayload.get("one_sided_friends"));
+        editor.putString("one_sided_followers", summaryPayload.get("one_sided_followers"));
+        editor.putString("mutual_friends", summaryPayload.get("mutual_friends"));
+        editor.putString("unfriends", summaryPayload.get("unfriends"));
+        editor.putString("unfollowers", summaryPayload.get("unfollowers"));
+        editor.putString("blocking_or_blocked", summaryPayload.get("blocking_or_blocked"));
+        editor.apply();
+
+        LocalBroadcastManager.getInstance(getApplicationContext())
+                .sendBroadcast(new Intent("com.egotter.MainActivity"));
+    }
+
     private void sendInstanceIdToServer() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if (prefs.contains("fcm_instance_id") && prefs.contains("twitter_id") && prefs.contains("twitter_access_token") && prefs.contains("twitter_access_secret")) {
@@ -186,13 +208,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService impleme
                     prefs.getString("fcm_instance_id", ""),
                     prefs.getString("twitter_access_token", ""),
                     prefs.getString("twitter_access_secret", ""),
-                    MyFirebaseMessagingService.this);
+                    new ApiClient.HttpTask.CallbackListener() {
+                        @Override
+                        public void onCallback(String result) {
+                        }
+                    });
         }
-    }
-
-    @Override
-    public void onCallback(String result) {
-
     }
 
     /**

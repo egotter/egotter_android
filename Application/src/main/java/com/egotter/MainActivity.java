@@ -17,7 +17,10 @@ package com.egotter;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -33,15 +36,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.egotter.ApiClient.HttpTask.CallbackListener;
-import com.egotter.dialogs.OpenPlayStoreDialogFragment;
-import com.egotter.dialogs.SignOutConfirmationDialogFragment;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.snackbar.Snackbar;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
@@ -55,10 +49,12 @@ import androidx.core.app.Person;
 import androidx.core.app.RemoteInput;
 import androidx.core.app.TaskStackBuilder;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.work.PeriodicWorkRequest;
 
-import com.example.android.wearable.wear.common.mock.MockDatabase;
-import com.example.android.wearable.wear.common.util.NotificationUtil;
+import com.egotter.ApiClient.HttpTask.CallbackListener;
+import com.egotter.dialogs.OpenPlayStoreDialogFragment;
+import com.egotter.dialogs.SignOutConfirmationDialogFragment;
 import com.egotter.handlers.BigPictureSocialIntentService;
 import com.egotter.handlers.BigPictureSocialMainActivity;
 import com.egotter.handlers.BigTextIntentService;
@@ -66,6 +62,13 @@ import com.egotter.handlers.BigTextMainActivity;
 import com.egotter.handlers.InboxMainActivity;
 import com.egotter.handlers.MessagingIntentService;
 import com.egotter.handlers.MessagingMainActivity;
+import com.example.android.wearable.wear.common.mock.MockDatabase;
+import com.example.android.wearable.wear.common.util.NotificationUtil;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -125,9 +128,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private TextView openEgotterText;
     private TextView aboutThisApp;
     private TextView lastSyncTimeText;
+    private TextView oneSidedFriendsText;
+    private TextView oneSidedFollowersText;
+    private TextView mutualFriendsText;
+    private TextView unfriendsText;
+    private TextView unfollowersText;
+    private TextView blockingOrBlockedText;
 
-    View signedInLayout;
-    View notSignedInLayout;
+    private View signedInLayout;
+    private View notSignedInLayout;
+
+    private BroadcastReceiver broadcastReceiver;
 
     private PeriodicWorkRequest workRequest;
 
@@ -166,18 +177,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         signInButton = findViewById(R.id.signInWithTwitter);
         currentUserButton = findViewById(R.id.currentUser);
         reauthenticateButton = findViewById(R.id.reauthenticateWithTwitter);
-        openEgotterText = findViewById(R.id.openEgotter);
-//        lastSyncTimeText = findViewById(R.id.lastSyncTime);
+//        openEgotterText = findViewById(R.id.openEgotter);
 
-//        signInButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (isUserSignedIn()) {
-//                } else {
-//                    signInWithTwitter(signInButton);
-//                }
-//            }
-//        });
+        oneSidedFriendsText = findViewById(R.id.oneSidedFriends);
+        oneSidedFollowersText = findViewById(R.id.oneSidedFollowers);
+        mutualFriendsText = findViewById(R.id.mutualFriends);
+        unfriendsText = findViewById(R.id.unfriends);
+        unfollowersText = findViewById(R.id.unfollowers);
+        blockingOrBlockedText = findViewById(R.id.blockingOrBlocked);
+
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                updateSummaryItemsList();
+            }
+        };
 
         // workRequest = new PeriodicWorkRequest.Builder(CheckResultWork.class, 1, TimeUnit.MINUTES).addTag(CheckResultWork.TAG).build();
         // WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(CheckResultWork.TAG, ExistingPeriodicWorkPolicy.REPLACE, workRequest);
@@ -198,10 +212,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        LocalBroadcastManager.getInstance(MainActivity.this).
+                registerReceiver((broadcastReceiver), new IntentFilter("com.egotter.MainActivity"));
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
 
         getInstanceId();
+        updateSummaryItemsList();
 
         if (isUserSignedIn()) {
             afterSignIn(getCurrentUser());
@@ -211,6 +233,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         AppRate.with(this).clearAgreeShowDialog();
         AppRate.showRateDialogIfMeetsConditions(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(broadcastReceiver);
     }
 
     @Override
@@ -371,11 +399,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     public void sendInstanceIdToServer(boolean isUserRequested) {
         if (lastSyncTime != null && System.currentTimeMillis() - lastSyncTime < SEND_INSTANCE_ID_INTERVAL) {
-            if (isUserRequested) {
-                long elapsed = SEND_INSTANCE_ID_INTERVAL - (System.currentTimeMillis() - lastSyncTime);
-                String message = getString(R.string.receiveIntervalTooShortFormat, String.valueOf(elapsed / 1000));
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-            }
+            long elapsed = SEND_INSTANCE_ID_INTERVAL - (System.currentTimeMillis() - lastSyncTime);
+            String message = getString(R.string.sendInstanceIdToServerIntervalTooShortFormat, String.valueOf(elapsed / 1000));
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -400,6 +426,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 //        lastSyncTimeText.setText(getString(R.string.lastSyncTimeFormat, DateFormat.format("hh:mm", new Date())));
     }
 
+    public void updateSummaryItemsList() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        if (!prefs.contains("one_sided_friends")) {
+            return;
+        }
+
+        oneSidedFriendsText.setText(getString(R.string.oneSidedFriendsCount, prefs.getString("one_sided_friends", "")));
+        oneSidedFollowersText.setText(getString(R.string.oneSidedFollowersCount, prefs.getString("one_sided_followers", "")));
+        mutualFriendsText.setText(getString(R.string.mutualFriendsCount, prefs.getString("mutual_friends", "")));
+        unfriendsText.setText(getString(R.string.unfriendsCount, prefs.getString("unfriends", "")));
+        unfollowersText.setText(getString(R.string.unfollowersCount, prefs.getString("unfollowers", "")));
+        blockingOrBlockedText.setText(getString(R.string.blockingOrBlockedCount, prefs.getString("blocking_or_blocked", "")));
+    }
 
     public void onCallback(String result) {
         Log.d(TAG, "HttpTask result " + result);

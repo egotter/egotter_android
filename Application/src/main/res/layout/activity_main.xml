@@ -65,7 +65,6 @@
         android:id="@+id/signedIn"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
         android:visibility="invisible">
 
         <LinearLayout
@@ -89,10 +88,56 @@
             <View style="@style/hr" />
 
             <TextView
-                android:id="@+id/openEgotter"
+                android:id="@+id/oneSidedFriends"
                 style="@style/button"
                 android:onClick="openEgotter"
-                android:text="@string/openEgotter" />
+                android:text="@string/oneSidedFriendsCount" />
+
+            <View style="@style/hr" />
+
+            <TextView
+                android:id="@+id/oneSidedFollowers"
+                style="@style/button"
+                android:onClick="openEgotter"
+                android:text="@string/oneSidedFollowersCount" />
+
+            <View style="@style/hr" />
+
+            <TextView
+                android:id="@+id/mutualFriends"
+                style="@style/button"
+                android:onClick="openEgotter"
+                android:text="@string/mutualFriendsCount" />
+
+            <View style="@style/hr" />
+
+            <TextView
+                android:id="@+id/unfriends"
+                style="@style/button"
+                android:onClick="openEgotter"
+                android:text="@string/unfriendsCount" />
+
+            <View style="@style/hr" />
+
+            <TextView
+                android:id="@+id/unfollowers"
+                style="@style/button"
+                android:onClick="openEgotter"
+                android:text="@string/unfollowersCount" />
+
+            <View style="@style/hr" />
+
+            <TextView
+                android:id="@+id/blockingOrBlocked"
+                style="@style/button"
+                android:onClick="openEgotter"
+                android:text="@string/blockingOrBlockedCount" />
+
+            <View style="@style/hr" />
+
+            <TextView
+                style="@style/button"
+                android:text="" />
 
 <!--            <View style="@style/hr" />-->
 
