@@ -91,7 +91,7 @@
                 android:id="@+id/oneSidedFriends"
                 style="@style/button"
                 android:onClick="openEgotter"
-                android:text="@string/oneSidedFriendsCount" />
+                android:text="@string/oneSidedFriendsInit" />
 
             <View style="@style/hr" />
 
@@ -99,7 +99,7 @@
                 android:id="@+id/oneSidedFollowers"
                 style="@style/button"
                 android:onClick="openEgotter"
-                android:text="@string/oneSidedFollowersCount" />
+                android:text="@string/oneSidedFollowersInit" />
 
             <View style="@style/hr" />
 
@@ -107,7 +107,7 @@
                 android:id="@+id/mutualFriends"
                 style="@style/button"
                 android:onClick="openEgotter"
-                android:text="@string/mutualFriendsCount" />
+                android:text="@string/mutualFriendsInit" />
 
             <View style="@style/hr" />
 
@@ -115,7 +115,7 @@
                 android:id="@+id/unfriends"
                 style="@style/button"
                 android:onClick="openEgotter"
-                android:text="@string/unfriendsCount" />
+                android:text="@string/unfriendsInit" />
 
             <View style="@style/hr" />
 
@@ -123,7 +123,7 @@
                 android:id="@+id/unfollowers"
                 style="@style/button"
                 android:onClick="openEgotter"
-                android:text="@string/unfollowersCount" />
+                android:text="@string/unfollowersInit" />
 
             <View style="@style/hr" />
 
@@ -131,32 +131,13 @@
                 android:id="@+id/blockingOrBlocked"
                 style="@style/button"
                 android:onClick="openEgotter"
-                android:text="@string/blockingOrBlockedCount" />
+                android:text="@string/blockingOrBlockedInit" />
 
             <View style="@style/hr" />
 
             <TextView
                 style="@style/button"
                 android:text="" />
-
-<!--            <View style="@style/hr" />-->
-
-<!--            <LinearLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:orientation="horizontal">-->
-
-<!--                <TextView-->
-<!--                    style="@style/button"-->
-<!--                    android:onClick="receivePromptReport"-->
-<!--                    android:text="@string/receivePromptReport" />-->
-
-<!--                <TextView-->
-<!--                    android:id="@+id/lastSyncTime"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:textSize="12sp" />-->
-<!--            </LinearLayout>-->
 
             <View style="@style/hr" />
 

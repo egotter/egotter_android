@@ -211,6 +211,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     new ApiClient.HttpTask.CallbackListener() {
                         @Override
                         public void onCallback(String result) {
+                            Log.d(TAG, "HttpTask result " + result);
                         }
                     });
         }

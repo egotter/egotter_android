@@ -64,6 +64,12 @@
     <string name="unfriendsCount">リムーブした %s人</string>
     <string name="unfollowersCount">リムーブされた %s人</string>
     <string name="blockingOrBlockedCount">ブロックされた %s人</string>
+    <string name="oneSidedFriendsInit">片思いフォロー 集計中</string>
+    <string name="oneSidedFollowersInit">片思われフォロワー 集計中</string>
+    <string name="mutualFriendsInit">両思いフォロー 集計中</string>
+    <string name="unfriendsInit">リムーブした 集計中</string>
+    <string name="unfollowersInit">リムーブされた 集計中</string>
+    <string name="blockingOrBlockedInit">ブロックされた 集計中</string>
 
     <string name="signInWithTwitter">Twitter でログインする</string>
     <string name="reauthenticateWithTwitter">他のアカウントでログインする</string>
