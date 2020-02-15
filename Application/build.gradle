@@ -35,8 +35,8 @@ android {
         applicationId "com.egotter"
         minSdkVersion 18
         targetSdkVersion 29
-        versionCode 18
-        versionName "開発版 Ver. 18"
+        versionCode 19
+        versionName "開発版 Ver. 19"
     }
 
     compileOptions {
