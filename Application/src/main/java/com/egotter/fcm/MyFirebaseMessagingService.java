@@ -47,6 +47,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -187,18 +191,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void saveSummaryItemsList(Map<String, String> summaryPayload) {
         Log.d(TAG, "saveSummaryItemsList() summaryPayload " + summaryPayload);
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("one_sided_friends", summaryPayload.get("one_sided_friends"));
-        editor.putString("one_sided_followers", summaryPayload.get("one_sided_followers"));
-        editor.putString("mutual_friends", summaryPayload.get("mutual_friends"));
-        editor.putString("unfriends", summaryPayload.get("unfriends"));
-        editor.putString("unfollowers", summaryPayload.get("unfollowers"));
-        editor.putString("blocking_or_blocked", summaryPayload.get("blocking_or_blocked"));
-        editor.apply();
-
-        LocalBroadcastManager.getInstance(getApplicationContext())
-                .sendBroadcast(new Intent("com.egotter.MainActivity"));
+        JSONObject json = new JSONObject(summaryPayload);
+        Intent intent = new Intent("com.egotter.MainActivity");
+        intent.putExtra("map", json.toString());
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 
     private void sendInstanceIdToServer() {

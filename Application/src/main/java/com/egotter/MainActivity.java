@@ -79,6 +79,9 @@ import com.google.firebase.iid.InstanceIdResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
+import java.util.Map;
+
 import hotchemi.android.rate.AppRate;
 import hotchemi.android.rate.OnClickButtonListener;
 
@@ -189,6 +192,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                if (intent.hasExtra("json")) {
+                    String str = intent.getStringExtra("json");
+                    if (str != null) {
+                        try {
+                            JSONObject json = new JSONObject(str);
+                            saveSummaryItemsList(json);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
                 updateSummaryItemsList();
             }
         };
@@ -426,6 +440,28 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 //        lastSyncTimeText.setText(getString(R.string.lastSyncTimeFormat, DateFormat.format("hh:mm", new Date())));
     }
 
+    private void saveSummaryItemsList(JSONObject summaryPayload) {
+        Log.d(TAG, "saveSummaryItemsList() summaryPayload " + summaryPayload);
+
+        if (!summaryPayload.has("one_sided_friends")) {
+            return;
+        }
+
+        try {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("one_sided_friends", summaryPayload.getString("one_sided_friends"));
+            editor.putString("one_sided_followers", summaryPayload.getString("one_sided_followers"));
+            editor.putString("mutual_friends", summaryPayload.getString("mutual_friends"));
+            editor.putString("unfriends", summaryPayload.getString("unfriends"));
+            editor.putString("unfollowers", summaryPayload.getString("unfollowers"));
+            editor.putString("blocking_or_blocked", summaryPayload.getString("blocking_or_blocked"));
+            editor.apply();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void updateSummaryItemsList() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if (!prefs.contains("one_sided_friends")) {
@@ -452,6 +488,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     return;
                 }
             }
+
+            if (json.has("one_sided_friends")) {
+                saveSummaryItemsList(json);
+                updateSummaryItemsList();
+            }
+
             if (json.has("error") && !json.getString("error").equals("")) {
                 Toast.makeText(this, R.string.sendInstanceIdFailed, Toast.LENGTH_SHORT).show();
             } else {
